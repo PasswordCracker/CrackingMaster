@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -24,8 +25,36 @@ namespace PasswordCrackerMaster
 
 
 
-        public static void HandleClient()
+        public static void HandleClient(TcpClient socket)
         {
+            NetworkStream ns = socket.GetStream();
+            StreamReader reader = new StreamReader(ns);
+            StreamWriter writer = new StreamWriter(ns);
+
+            Console.WriteLine("Slave is here");
+
+            string message = reader.ReadLine();
+            Console.WriteLine("Slave wrote " + message);
+            writer.WriteLine(message);
+            writer.Flush();
+
+
+            while(true)
+            {
+                string command = reader.ReadLine();
+                string parameter = reader.ReadLine();
+                if(command == "SendPasswords" && string.IsNullOrEmpty(parameter))
+                {
+
+                }
+
+                else
+                {
+                    writer.WriteLine("Invalid command, valid commands are: ");
+                    writer.Flush();
+                }
+            }
+
 
         }
     }
