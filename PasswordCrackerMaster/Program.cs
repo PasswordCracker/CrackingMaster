@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,12 +10,12 @@ namespace PasswordCrackerMaster
 {
     public class Program
     {
+        
         static List<Client> clientList = new List<Client>();
         static List<Client> readyList = new List<Client>();
         static void Main(string[] args)
         {
-
-            TcpListener listener = new TcpListener(System.Net.IPAddress.Loopback, 10001);
+            TcpListener listener = new TcpListener(IPAddress.Any, 10001);
             listener.Start();
             Console.WriteLine("Master is here");
 
@@ -33,16 +34,19 @@ namespace PasswordCrackerMaster
                 }
 
             }
-        }
-
+        }      
 
 
         public static void HandleClient(TcpClient socket)
         {
+            Client c = new Client();
+            
+
+            clientList.Add(c);
             NetworkStream ns = socket.GetStream();
             StreamReader reader = new StreamReader(ns);
             StreamWriter writer = new StreamWriter(ns);
-            Client c = new Client();
+
             c.IPAdrress = socket.Client.RemoteEndPoint.ToString();
             c.Ready = false;
             clientList.Add(c);
@@ -59,14 +63,19 @@ namespace PasswordCrackerMaster
             }
             if (clientList.Count == readyList.Count)
             {
-                foreach(Client in readyList)
-                writer.WriteLine("ready");
-                Console.WriteLine("All slaves are ready, type start to commence cracking");
-                string command = Console.ReadLine();
-                if (command == "start")
+                foreach (var sc in clientList)
                 {
-                    string jsonstring = JsonSerializer.Serialize();
+                    writer.WriteLine("ready");
+                    Console.WriteLine("All slaves are ready, type start to commence cracking");
+                    string command = Console.ReadLine();
+                    if (command == "start")
+                    {
+                        string jsonstring = JsonSerializer.Serialize(command);
+
+                        writer.Flush();
+                    }
                 }
+
             }
         }
 
@@ -74,5 +83,6 @@ namespace PasswordCrackerMaster
         {
 
         }
+
     }
 }
