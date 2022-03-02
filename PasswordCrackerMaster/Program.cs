@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordCrackerMaster
 {
     public class Program
     {
-        
         static List<Client> clientList = new List<Client>();
         static List<Client> readyList = new List<Client>();
         static void Main(string[] args)
@@ -25,7 +26,6 @@ namespace PasswordCrackerMaster
                 {
                     TcpClient socket = listener.AcceptTcpClient();
 
-
                     Task.Run(() =>
                     {
                         HandleClient(socket);
@@ -34,15 +34,12 @@ namespace PasswordCrackerMaster
                 }
 
             }
-        }      
+        }
 
 
         public static void HandleClient(TcpClient socket)
         {
             Client c = new Client();
-            
-
-            clientList.Add(c);
             NetworkStream ns = socket.GetStream();
             StreamReader reader = new StreamReader(ns);
             StreamWriter writer = new StreamWriter(ns);
@@ -54,16 +51,18 @@ namespace PasswordCrackerMaster
 
             string message = reader.ReadLine();
             Console.WriteLine("Slave wrote " + message);
-            if (message == "Ready")
+
+
+            if (message == "ready")
             {
                 c.Ready = true;
                 readyList.Add(c);
-                writer.WriteLine($"{readyList.Count} out of {clientList.Count} clients are ready");
+                Console.WriteLine($"{readyList.Count} out of {clientList.Count} clients are ready");
                 writer.Flush();
             }
             if (clientList.Count == readyList.Count)
             {
-                foreach (var sc in clientList)
+                foreach (var client in readyList)
                 {
                     writer.WriteLine("ready");
                     Console.WriteLine("All slaves are ready, type start to commence cracking");
@@ -71,17 +70,13 @@ namespace PasswordCrackerMaster
                     if (command == "start")
                     {
                         string jsonstring = JsonSerializer.Serialize(command);
-
+                        writer.WriteLine(jsonstring);
                         writer.Flush();
                     }
+                    else Console.WriteLine("Invalid command, try 'start' ");
                 }
 
             }
-        }
-
-        public static void ComparingClientCount()
-        {
-
         }
 
     }
