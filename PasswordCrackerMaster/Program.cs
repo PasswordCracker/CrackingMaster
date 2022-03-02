@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PasswordCrackerMaster.Helper;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -62,13 +63,15 @@ namespace PasswordCrackerMaster
             }
             if (clientList.Count == readyList.Count)
             {
-                foreach (var client in readyList)
+                foreach (var client in readyList)   //Not sure if correct, but now it can process multiple slaves... i think
                 {
                     writer.WriteLine("ready");
                     Console.WriteLine("All slaves are ready, type start to commence cracking");
                     string command = Console.ReadLine();
                     if (command == "start")
                     {
+                        var websterDic = ReadHelper.ReadDictionary();
+
                         string jsonstring = JsonSerializer.Serialize(command);
                         writer.WriteLine(jsonstring);
                         writer.Flush();
