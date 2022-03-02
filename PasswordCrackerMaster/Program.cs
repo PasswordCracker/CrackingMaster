@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PasswordCrackerMaster
@@ -14,7 +15,7 @@ namespace PasswordCrackerMaster
     public class Program
     {
         static List<Client> clientList = new List<Client>();
-        static List<Client> readyList = new List<Client>();
+        public static List<Client> readyList = new List<Client>();
         static void Main(string[] args)
         {
             TcpListener listener = new TcpListener(IPAddress.Any, 10001);
