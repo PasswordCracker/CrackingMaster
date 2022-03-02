@@ -32,5 +32,23 @@ namespace PasswordCrackerMaster.Helper
 
             return wordlist;
         }
+
+        public static Dictionary<string, string> ReadPasswords()
+        {
+            Dictionary<string, string> credentialDictionary = new Dictionary<string, string>();
+
+            using (FileStream fs = new FileStream("passwords.txt", FileMode.Open, FileAccess.Read))
+            using (StreamReader passwords = new StreamReader(fs))
+            {
+                while (!passwords.EndOfStream)
+                {
+                    string passwordsEntry = passwords.ReadLine();
+                    string[] credentials = passwordsEntry.Split(":");
+                    credentialDictionary.Add(credentials[0].ToString(), credentials[1].ToString());
+
+                }
+            }
+            return credentialDictionary;
+        }
     }
 }
