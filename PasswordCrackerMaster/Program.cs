@@ -24,7 +24,7 @@ namespace PasswordCrackerMaster
 
 
 
-        public static void HandleClient()
+        public static void HandleClient(TcpClient socket)
         {
 
         }
