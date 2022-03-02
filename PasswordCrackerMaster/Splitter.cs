@@ -14,61 +14,61 @@ namespace PasswordCrackerMaster
     {
         #region v2
 
-        private bool ChunkIsFull = false;
-        public int WordCount = 10000;
-        static int ReadyClients = Program.readyList.Count;
-        BlockingCollection<List<string>> chunks = new BlockingCollection<List<string>>();
-        private void CreateChunks(List<string> wordDictList)
-        {
-            List<string> chunk = new List<string>();
-            while ()
-                ReadHelper.ReadDictionary().Count / WordCount
+        //private bool ChunkIsFull = false;
+        //public int WordCount = 10000;
+        //static int ReadyClients = Program.readyList.Count;
+        //BlockingCollection<List<string>> chunks = new BlockingCollection<List<string>>();
+        //private void CreateChunks(List<string> wordDictList)
+        //{
+        //    List<string> chunk = new List<string>();
+        //    while ()
+        //        ReadHelper.ReadDictionary().Count / WordCount
 
 
 
-            #region v1
+        //    #region v1
 
-            //if (wordDictList.Count % ClientsReady == 0)
-            //{
-            //    counter = wordDictList.Count / ClientsReady;
-            //}
-            //else
-            //{
-            //    counter = wordDictList.Count / ClientsReady + 1;
-            //}
-
-
+        //    //if (wordDictList.Count % ClientsReady == 0)
+        //    //{
+        //    //    counter = wordDictList.Count / ClientsReady;
+        //    //}
+        //    //else
+        //    //{
+        //    //    counter = wordDictList.Count / ClientsReady + 1;
+        //    //}
 
 
-            //using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
-            //using (StreamReader dictionary = new StreamReader(fs))
-            //{
-            //    while (!dictionary.EndOfStream)
-            //    {
-            //        counter++;
-            //        String word = dictionary.ReadLine();
-
-            //        if()
-            //        {
-            //            chunk.Add(word);
-            //        }
-
-            //        //if (counter % 10000 != 0)
-            //        //{
-            //        //    chunk.Add(word);
-            //        //}
-            //        else
-            //        {
-            //            chunks.Add(chunk);
-            //            chunk = new List<string>();
-            //        }
-            //        chunks.Add(chunk);
-            //    }
-            //}
 
 
-            #endregion
-        }
+        //    //using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
+        //    //using (StreamReader dictionary = new StreamReader(fs))
+        //    //{
+        //    //    while (!dictionary.EndOfStream)
+        //    //    {
+        //    //        counter++;
+        //    //        String word = dictionary.ReadLine();
+
+        //    //        if()
+        //    //        {
+        //    //            chunk.Add(word);
+        //    //        }
+
+        //    //        //if (counter % 10000 != 0)
+        //    //        //{
+        //    //        //    chunk.Add(word);
+        //    //        //}
+        //    //        else
+        //    //        {
+        //    //            chunks.Add(chunk);
+        //    //            chunk = new List<string>();
+        //    //        }
+        //    //        chunks.Add(chunk);
+        //    //    }
+        //    //}
+
+
+        //    #endregion
+        //}
 
         #endregion
         //static int ClientsReady = 5;

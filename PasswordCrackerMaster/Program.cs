@@ -18,7 +18,7 @@ namespace PasswordCrackerMaster
         public static List<Client> readyList = new List<Client>();
         static void Main(string[] args)
         {
-            TcpListener listener = new TcpListener(IPAddress.Any, 10001);
+            TcpListener listener = new TcpListener(IPAddress.Any, 10000);
             listener.Start();
             Console.WriteLine("Master is here");
 
@@ -71,11 +71,10 @@ namespace PasswordCrackerMaster
                     string command = Console.ReadLine();
                     if (command == "start")
                     {
-                        var websterDic = ReadHelper.ReadDictionary();
-
                         string jsonstring = JsonSerializer.Serialize(command);
                         writer.WriteLine(jsonstring);
                         writer.Flush();
+
                     }
                     else Console.WriteLine("Invalid command, try 'start' ");
                 }
