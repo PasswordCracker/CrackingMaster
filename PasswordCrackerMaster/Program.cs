@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,19 +10,29 @@ namespace PasswordCrackerMaster
 {
     public class Program
     {
+        static List<Client> clientList = new List<Client>();
+        static List<Client> readyList = new List<Client>();
         static void Main(string[] args)
         {
+
             TcpListener listener = new TcpListener(System.Net.IPAddress.Loopback, 10001);
             listener.Start();
             Console.WriteLine("Master is here");
 
             while (true)
             {
-                TcpClient socket = listener.AcceptTcpClient();
-                Task.Run(() =>
+                if (listener.Pending())
                 {
-                    HandleClient(socket);
-                });
+                    TcpClient socket = listener.AcceptTcpClient();
+
+
+                    Task.Run(() =>
+                    {
+                        HandleClient(socket);
+
+                    });
+                }
+
             }
         }
 
@@ -32,35 +43,37 @@ namespace PasswordCrackerMaster
             NetworkStream ns = socket.GetStream();
             StreamReader reader = new StreamReader(ns);
             StreamWriter writer = new StreamWriter(ns);
-
-            Console.WriteLine("Slave is here");
+            Client c = new Client();
+            c.IPAdrress = socket.Client.RemoteEndPoint.ToString();
+            c.Ready = false;
+            clientList.Add(c);
+            Console.WriteLine("New slave is here");
 
             string message = reader.ReadLine();
             Console.WriteLine("Slave wrote " + message);
-            writer.WriteLine(message);
-            writer.Flush();
-
-
-            while(true)
+            if (message == "Ready")
             {
-                string command = reader.ReadLine();
-                string parameter = reader.ReadLine();
-                if(command == "SendPasswords" && string.IsNullOrEmpty(parameter))
+                c.Ready = true;
+                readyList.Add(c);
+                writer.WriteLine($"{readyList.Count} out of {clientList.Count} clients are ready");
+                writer.Flush();
+            }
+            if (clientList.Count == readyList.Count)
+            {
+                foreach(Client in readyList)
+                writer.WriteLine("ready");
+                Console.WriteLine("All slaves are ready, type start to commence cracking");
+                string command = Console.ReadLine();
+                if (command == "start")
                 {
-
-                }
-
-                else
-                {
-                    writer.WriteLine("Invalid command, valid commands are: ");
-                    writer.Flush();
+                    string jsonstring = JsonSerializer.Serialize();
                 }
             }
-
-
         }
 
-        
+        public static void ComparingClientCount()
+        {
+
         }
     }
 }
