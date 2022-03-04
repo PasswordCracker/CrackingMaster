@@ -12,21 +12,7 @@ namespace PasswordCrackerMaster
 {
     public class Splitter
     {
-        #region v2
-
-        //private bool ChunkIsFull = false;
-        //public int WordCount = 10000;
-        //static int ReadyClients = Program.readyList.Count;
-        //BlockingCollection<List<string>> chunks = new BlockingCollection<List<string>>();
-        //private void CreateChunks(List<string> wordDictList)
-        //{
-        //    List<string> chunk = new List<string>();
-        //    while ()
-        //        ReadHelper.ReadDictionary().Count / WordCount
-
-
-
-        //    #region v1
+        #region v1
 
         //    //if (wordDictList.Count % ClientsReady == 0)
         //    //{
@@ -66,16 +52,17 @@ namespace PasswordCrackerMaster
         //    //    }
         //    //}
 
-
-        //    #endregion
         //}
 
         #endregion
         //static int ClientsReady = 5;
         private static int ClientsReady = Program.readyList.Count;
-        const int WordsPerChunk = 1000;
+        const int WordsPerChunk = 1000;  // If left constant it splits everything like that, no matter how many clients there are
+        //Was it intended like that?
         public static List<List<string>> ReadDictionaryAndCreateChunks(List<string> wordDictList)
         {
+            //int WordsPerChunk = wordDictList.Count / Program.readyList.Count;
+
             List<List<string>> ListOfChunks = new List<List<string>>();
             int wordindex = 1;
             while (wordindex < wordDictList.Count)
@@ -84,16 +71,28 @@ namespace PasswordCrackerMaster
                 int counter = 1;
                 while (counter < WordsPerChunk && wordindex < wordDictList.Count)
                 {
-
+                    
                     Chunk.Add(wordDictList[wordindex]);
                     counter++;
-                    wordindex++;
+                    wordindex++;                    
+
                 }
+                //if (ListOfChunks.Count == Program.readyList.Count)
+                //{
+                //    //if (ListOfChunks.First > ListOfChunks.Last)
+                //    //{
+                //    //    ListOfChunks[0].Concat(Chunk).ToList();
+                //    //}
+
+                //    ListOfChunks[ListOfChunks.Count - 1].AddRange(Chunk);
+                //    return ListOfChunks;
+                //}
                 ListOfChunks.Add(Chunk);
+                
             }
 
             return ListOfChunks;
         }
-        
+
     }
 }
