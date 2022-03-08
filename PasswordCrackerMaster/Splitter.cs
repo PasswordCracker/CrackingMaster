@@ -56,7 +56,7 @@ namespace PasswordCrackerMaster
 
         #endregion
         //static int ClientsReady = 5;
-        private static int ClientsReady = Program.readyList.Count;
+        private static int ClientsReady;
         const int WordsPerChunk = 1000;  // If left constant it splits everything like that, no matter how many clients there are
         //Was it intended like that?
         public static List<List<string>> ReadDictionaryAndCreateChunks(List<string> wordDictList)
