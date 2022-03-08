@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PasswordCrackerMaster
 {
@@ -19,19 +20,19 @@ namespace PasswordCrackerMaster
         public static List<TcpClient> testList = new List<TcpClient>(); //what is this for?
         static bool waitingforclients = true; //if this is false, the master will stop accepting new clients
         static List<List<string>> ListOfChunks = new List<List<string>>();
+        static Dictionary<string, string> Passwords = new Dictionary<string, string>();
         static List<Client> hasNoChunk = new List<Client>();
         static void Main(string[] args)
         {
+            ServicePointManager.DefaultConnectionLimit = 25;
             TcpListener listener = new TcpListener(IPAddress.Any, 21);
             listener.Start();
             Console.WriteLine("Master is here");
+            Console.WriteLine("Reading passwords");
+            Passwords = Helper.ReadHelper.ReadPasswords();
+            Console.WriteLine("Reading dictionary");
+            ListOfChunks = Splitter.ReadDictionaryAndCreateChunks(Helper.ReadHelper.ReadDictionary());
             Console.WriteLine("Awaiting clients");
-
-            Task.Run(() =>
-            {
-                 ListOfChunks = Splitter.ReadDictionaryAndCreateChunks(Helper.ReadHelper.ReadDictionary());
-            });
-
             while (waitingforclients)
             {
                 if (listener.Pending())
@@ -49,26 +50,59 @@ namespace PasswordCrackerMaster
                     });
                 }
             }
-            //send out chunks and receive results
-            while(ListOfChunks.Count > 0)
+            //Tell clients that everything is ready
+            Console.WriteLine("Telling clients that everything is ready");
+            foreach(Client c in clientList)
             {
-                Task.Run(() =>
-                {
-                    CheckClients();
-                    HandOutChunks();
-                    foreach(Client c in clientList)
-                    {
-                        AwaitResults(c);
-                    }
-                });
+                c.Writer.WriteLine("ready");
+                c.Writer.Flush();
             }
+            //send out passwords
+            Console.WriteLine("Sending passwords");
+            string jsonpasswords = JsonSerializer.Serialize(Passwords);
+            //byte[] dataBytes = Encoding.Default.GetBytes(jsonpasswords);
+            foreach (Client c in clientList)
+            {
+                c.Writer.WriteLine(jsonpasswords);
+                c.Writer.Flush();
+            }
+            //waiting for confirmation
+            //readyclients = 0;
+            //while (readyclients!=clientList.Count)
+            //{
+            //    foreach (Client c in clientList)
+            //    Task.Run(() =>
+            //    {
+            //        AwaitMessage(c.Socket);
+            //    });
+            //}
+            Console.WriteLine("All clients received the passwords");
+            //send out chunks and receive results
+            while (ListOfChunks.Count > 0)
+            {
+                CheckClients();
+                HandOutChunks();
+                foreach(Client c in clientList)
+                {
+                    AwaitResults(c);
+                }
+            }
+            Console.WriteLine("Work is finished");
             //tell all clients the work is finished
+            foreach (Client c in clientList)
+            {
+                c.Writer.WriteLine("finished");
+                c.Writer.Flush();
+                c.Socket.Close();
+            }
         }
 
         //accepts clients and adds them to the list
         public static void HandleClient(TcpClient socket)
         {
             testList.Add(socket);
+            socket.ReceiveTimeout = 50000;
+            socket.SendTimeout = 50000;
 
             Client c = new Client();
             NetworkStream ns = socket.GetStream();
@@ -132,22 +166,33 @@ namespace PasswordCrackerMaster
         //gives a chunk to all the clients that do not have one
         public static void HandOutChunks()
         {
-            foreach(Client c in hasNoChunk)
+            int counter = ListOfChunks.Count-1;
+            foreach (Client c in hasNoChunk)
             {
-                List<string> chunk = ListOfChunks[ListOfChunks.Count];
-                ListOfChunks.RemoveAt(ListOfChunks.Count);
-                string jsonchunk = JsonSerializer.Serialize(chunk);
-                c.Writer.WriteLine(jsonchunk);
-                c.Writer.Flush();
+                if (counter >= 0)
+                {
+                    List<string> chunk = ListOfChunks[counter];
+                    ListOfChunks.RemoveAt(counter);
+                    counter--;
+                    string jsonchunk = JsonSerializer.Serialize(chunk);
+                    c.Writer.WriteLine(jsonchunk);
+                    c.Writer.Flush();
+                }
+                else break;
             }
         }
         public static void AwaitResults(Client client)
         {
-            string jsonresult = client.Reader.ReadToEnd();
-            Dictionary<string, string> result = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonresult);
-            foreach(KeyValuePair<string, string> kvp in result)
+            string jsonresult = client.Reader.ReadLine();
+            if (jsonresult.ToLower() != "empty")
             {
-                Console.WriteLine(kvp.Key + " : " + kvp.Value);
+                Console.WriteLine("Received some results:");
+                Console.WriteLine();
+                Dictionary<string, string> result = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonresult);
+                foreach (KeyValuePair<string, string> kvp in result)
+                {
+                    Console.WriteLine(kvp.Key + " : " + kvp.Value);
+                }
             }
             //add this result to the file
             client.HasChunk = false;
