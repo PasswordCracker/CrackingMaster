@@ -71,9 +71,7 @@ namespace PasswordCrackerMaster
         //}
 
         #endregion
-        //static int ClientsReady = 5;
-        private static int ClientsReady = Program.readyList.Count;
-        const int WordsPerChunk = 1000;
+        const int WordsPerChunk = 10000;
         public static List<List<string>> ReadDictionaryAndCreateChunks(List<string> wordDictList)
         {
             List<List<string>> ListOfChunks = new List<List<string>>();
@@ -84,7 +82,6 @@ namespace PasswordCrackerMaster
                 int counter = 1;
                 while (counter < WordsPerChunk && wordindex < wordDictList.Count)
                 {
-
                     Chunk.Add(wordDictList[wordindex]);
                     counter++;
                     wordindex++;
