@@ -66,27 +66,33 @@ namespace PasswordCrackerMaster
                 c.Writer.WriteLine(jsonpasswords);
                 c.Writer.Flush();
             }
-            //waiting for confirmation
-            //readyclients = 0;
-            //while (readyclients!=clientList.Count)
-            //{
-            //    foreach (Client c in clientList)
-            //    Task.Run(() =>
-            //    {
-            //        AwaitMessage(c.Socket);
-            //    });
-            //}
             Console.WriteLine("All clients received the passwords");
             //send out chunks and receive results
             while (ListOfChunks.Count > 0)
             {
                 CheckClients();
                 HandOutChunks();
-                foreach(Client c in clientList)
-                {
-                    AwaitResults(c);
-                }
+
+                foreach (Client c in clientList)
+                    if (c.awaitsResponse == false)
+                        Task.Run(() =>
+                        {
+                            AwaitResults(c);
+                        });
             }
+            //readyclients = 0;
+            //waitingforclients = true;
+            //foreach(Client c in clientList)
+            //{
+            //    Task.Run(() =>
+            //    {
+            //        AwaitMessage(c.Socket);
+            //    });
+            //}
+            //while (waitingforclients)
+            //{
+            //    Thread.Sleep(1000);
+            //}
             Console.WriteLine("Work is finished");
             //tell all clients the work is finished
             foreach (Client c in clientList)
@@ -101,8 +107,6 @@ namespace PasswordCrackerMaster
         public static void HandleClient(TcpClient socket)
         {
             testList.Add(socket);
-            socket.ReceiveTimeout = 50000;
-            socket.SendTimeout = 50000;
 
             Client c = new Client();
             NetworkStream ns = socket.GetStream();
@@ -161,6 +165,7 @@ namespace PasswordCrackerMaster
             foreach (Client c in clientList)
             {
                 if(!c.HasChunk) hasNoChunk.Add(c);
+                else if(c.HasChunk) hasNoChunk.Remove(c);
             }
         }
         //gives a chunk to all the clients that do not have one
@@ -175,19 +180,27 @@ namespace PasswordCrackerMaster
                     ListOfChunks.RemoveAt(counter);
                     counter--;
                     string jsonchunk = JsonSerializer.Serialize(chunk);
+                    c.HasChunk = true;
+                    c.awaitsResponse = false;
                     c.Writer.WriteLine(jsonchunk);
                     c.Writer.Flush();
                 }
                 else break;
             }
+            //foreach (Client c in hasNoChunk)
+            //{
+            //    if (c.HasChunk == false)
+            //    {
+            //        c.Writer.WriteLine("nochunks");
+            //        c.Writer.Flush();
+            //    }
+            //}
         }
         public static void AwaitResults(Client client)
         {
             string jsonresult = client.Reader.ReadLine();
             if (jsonresult.ToLower() != "empty")
             {
-                Console.WriteLine("Received some results:");
-                Console.WriteLine();
                 Dictionary<string, string> result = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonresult);
                 foreach (KeyValuePair<string, string> kvp in result)
                 {
@@ -196,6 +209,7 @@ namespace PasswordCrackerMaster
             }
             //add this result to the file
             client.HasChunk = false;
+            client.awaitsResponse = true;
         }
         //public static void Aux()
         //{ 

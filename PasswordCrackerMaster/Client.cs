@@ -16,5 +16,6 @@ namespace PasswordCrackerMaster
         public StreamWriter Writer { get; set; }
         public StreamReader Reader { get; set; }
         public bool HasChunk { get; set; }
+        public bool awaitsResponse { get; set; }
     }
 }
