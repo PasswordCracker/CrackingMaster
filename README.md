@@ -5,5 +5,7 @@ Launch the solution in visual studio and follow the instructions from the consol
 Functionality:
 
 -Can accept multiple clients
+
 -Sends out the encrypted passwords and the dictionary
+
 -Collects results from the clients
